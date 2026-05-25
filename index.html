@@ -19,7 +19,6 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background: var(--ink); font-family: 'Lato', sans-serif; overflow: hidden; }
 
-    /* ── Tela do Buscador ── */
     #buscador-tela {
       display: flex;
       align-items: center;
@@ -55,9 +54,7 @@
       background: white;
       color: var(--ink);
     }
-    input[type="number"]:focus {
-      border-color: var(--gold);
-    }
+    input[type="number"]:focus { border-color: var(--gold); }
 
     .btn-search {
       width: 100%;
@@ -74,7 +71,6 @@
     }
     .btn-search:active { opacity: .8; }
 
-    /* ── Tela do Leitor ── */
     #leitor-tela {
       display: none;
       flex-direction: column;
@@ -116,7 +112,6 @@
       overflow: hidden;
     }
 
-    /* Overlay de carregamento */
     #loading-overlay {
       position: absolute;
       inset: 0;
@@ -129,10 +124,7 @@
       z-index: 10;
       transition: opacity .4s;
     }
-    #loading-overlay.oculto {
-      opacity: 0;
-      pointer-events: none;
-    }
+    #loading-overlay.oculto { opacity: 0; pointer-events: none; }
 
     .spinner {
       width: 44px;
@@ -144,13 +136,8 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    #loading-overlay p {
-      color: var(--gold);
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px;
-    }
+    #loading-overlay p { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 18px; text-align: center; padding: 0 24px; }
 
-    /* Botão de fallback (aparece se demorar muito) */
     #btn-fallback {
       display: none;
       margin-top: 8px;
@@ -163,42 +150,16 @@
       font-size: 14px;
     }
 
-    /* iframe do Google Docs Viewer */
     #pdf-iframe {
       width: 100%;
       height: 100%;
       border: none;
       display: block;
     }
-
-    /* Mensagem de erro */
-    #erro-msg {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #ccc;
-      text-align: center;
-      padding: 24px;
-      gap: 16px;
-    }
-    #erro-msg p { font-size: 16px; line-height: 1.6; }
-    #btn-abrir-drive {
-      background: var(--gold);
-      color: var(--ink);
-      border: none;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 15px;
-    }
   </style>
 </head>
 <body>
 
-  <!-- ══ TELA 1: BUSCADOR ══ -->
   <div id="buscador-tela">
     <div class="card">
       <h1>Harpa Cristã</h1>
@@ -208,7 +169,6 @@
     </div>
   </div>
 
-  <!-- ══ TELA 2: LEITOR ══ -->
   <div id="leitor-tela">
     <div class="toolbar">
       <button class="btn-back" onclick="voltarParaBusca()">← Voltar</button>
@@ -217,43 +177,29 @@
     </div>
 
     <div id="pdf-frame-wrap">
-
-      <!-- Overlay de carregamento -->
       <div id="loading-overlay">
         <div class="spinner"></div>
         <p id="loading-txt">A carregar partitura…</p>
-        <button id="btn-fallback" onclick="abrirNoDrive()">
-          Abrir no Google Drive ↗
+        <button id="btn-fallback" onclick="abrirNoOneDrive()">
+          Abrir no OneDrive ↗
         </button>
       </div>
-
-      <!-- iframe — Google Docs Viewer não tem bloqueio CORS -->
       <iframe id="pdf-iframe" title="Partitura"></iframe>
-
-      <!-- Fallback de erro -->
-      <div id="erro-msg">
-        <p>Não foi possível exibir o PDF aqui.<br>Abra diretamente no Google Drive para ver a partitura.</p>
-        <button id="btn-abrir-drive" onclick="abrirNoDrive()">Abrir no Google Drive ↗</button>
-      </div>
-
     </div>
   </div>
 
   <script>
-    // ── Configuração ──────────────────────────────────────────────
-    const ID_DRIVE = "1P8nX0di3BEfca1JN4JIWVpquOZQdr_Ae";
+    // ── URL do OneDrive ───────────────────────────────────────────
+    // Link de compartilhamento original convertido para embed do Office Viewer
+    const ONEDRIVE_SHARE_URL = "https://1drv.ms/b/c/3c6b04cfdf9b66c7/IQA7YO_ql_HxTaZNEBfUYEYOAf0OnG5XLIhEAuIy5Vh9GKs?e=Ppiy6r";
 
-    // URL para o Google Docs Viewer (sem bloqueio CORS no navegador)
-    // O "#page=N" funciona no viewer do Google
+    // O Microsoft Office Online Viewer aceita qualquer URL pública de PDF
+    // Basta encodar a URL e passar como parâmetro "src"
     function urlViewer(pagina) {
-      const pdfUrl = `https://drive.google.com/file/d/${ID_DRIVE}/preview`;
-      // O viewer do Google aceita ?page=N para ir direto à página
-      return `https://drive.google.com/file/d/${ID_DRIVE}/preview#page=${pagina}`;
-    }
-
-    // URL de download direto (para abrir numa nova aba como fallback)
-    function urlDireto() {
-      return `https://drive.google.com/file/d/${ID_DRIVE}/view`;
+      const encodedUrl = encodeURIComponent(ONEDRIVE_SHARE_URL);
+      // O viewer da Microsoft não suporta salto de página via URL,
+      // mas carrega o PDF corretamente sem CORS
+      return `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
     }
 
     // ── Tabela de páginas ─────────────────────────────────────────
@@ -271,10 +217,9 @@
     }
 
     // ── Estado ────────────────────────────────────────────────────
-    let hinoAtual = null;
     let fallbackTimer = null;
 
-    // ── Funções principais ────────────────────────────────────────
+    // ── Funções ───────────────────────────────────────────────────
     function abrirHino() {
       const input = document.getElementById('hinoInput');
       const n = parseInt(input.value);
@@ -284,51 +229,42 @@
         return;
       }
 
-      hinoAtual = n;
       const pagina = paginaDo(n);
 
-      // Alterna telas
       document.getElementById('buscador-tela').style.display = 'none';
       document.getElementById('leitor-tela').style.display   = 'flex';
-
-      // Reset estado
-      document.getElementById('titulo-leitor').textContent = `Hino ${n}`;
+      document.getElementById('titulo-leitor').textContent   = `Hino ${n}`;
       document.getElementById('loading-overlay').classList.remove('oculto');
-      document.getElementById('loading-txt').textContent = 'A carregar partitura…';
-      document.getElementById('btn-fallback').style.display = 'none';
-      document.getElementById('erro-msg').style.display = 'none';
-      document.getElementById('pdf-iframe').src = '';
+      document.getElementById('loading-txt').textContent     = 'A carregar partitura…';
+      document.getElementById('btn-fallback').style.display  = 'none';
+      document.getElementById('pdf-iframe').src              = '';
 
-      // Carrega o iframe
       const iframe = document.getElementById('pdf-iframe');
       iframe.src = urlViewer(pagina);
 
-      // Quando o iframe terminar de carregar, esconde o overlay
       iframe.onload = () => {
         clearTimeout(fallbackTimer);
         document.getElementById('loading-overlay').classList.add('oculto');
       };
 
-      // Se demorar mais de 8 s, mostra botão de fallback
+      // Após 10s sem resposta, mostra botão de fallback
       fallbackTimer = setTimeout(() => {
         document.getElementById('loading-txt').textContent = 'A demorar mais do que o normal…';
         document.getElementById('btn-fallback').style.display = 'block';
-      }, 8000);
+      }, 10000);
     }
 
     function voltarParaBusca() {
       clearTimeout(fallbackTimer);
-      // Para o iframe (evita downloads em background)
-      document.getElementById('pdf-iframe').src = '';
+      document.getElementById('pdf-iframe').src            = '';
       document.getElementById('leitor-tela').style.display  = 'none';
       document.getElementById('buscador-tela').style.display = 'flex';
     }
 
-    function abrirNoDrive() {
-      window.open(urlDireto(), '_blank');
+    function abrirNoOneDrive() {
+      window.open(ONEDRIVE_SHARE_URL, '_blank');
     }
 
-    // Atalho: Enter faz a busca
     document.getElementById('hinoInput').addEventListener('keypress', e => {
       if (e.key === 'Enter') abrirHino();
     });
