@@ -1,116 +1,498 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Harpa Cristã — Buscador</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <title>Harpa Cristã Digital</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- PDF JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
   <style>
-    :root {
-      --gold:       #c9a84c;
-      --gold-dark:  #8a6820;
-      --ink:        #1a1209;
-      --parchment:  #faf6ef;
-      --parch-dark: #f0e9d8;
+    :root{
+      --gold:#c9a84c;
+      --gold-dark:#8a6820;
+      --ink:#1a1209;
+      --parchment:#faf6ef;
+      --parch-dark:#f0e9d8;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: var(--ink); font-family: 'Lato', sans-serif; }
-
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
     }
 
-    .card {
-      background: radial-gradient(circle at top left, var(--parchment) 0%, var(--parch-dark) 100%);
-      width: 100%;
-      max-width: 400px;
-      border-radius: 20px;
-      padding: 32px 24px;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-      border: 1px solid rgba(138,104,32,0.2);
+    html,body{
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      font-family:'Lato',sans-serif;
+      background:#111;
     }
 
-    h1 { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--ink); margin-bottom: 4px; }
-    .subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 18px; color: var(--gold-dark); margin-bottom: 24px; }
-    
-    input[type="number"] {
-      width: 100%;
-      padding: 16px;
-      font-size: 24px;
-      font-weight: 700;
-      border: 2px solid var(--parch-dark);
-      border-radius: 12px;
-      text-align: center;
-      outline: none;
-      margin-bottom: 16px;
+    /* ===================== */
+    /* TELA BUSCA            */
+    /* ===================== */
+
+    #buscador-tela{
+      width:100%;
+      height:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      background:
+      radial-gradient(circle at top,
+      #2b2015 0%,
+      #111 100%);
     }
 
-    .btn-search {
-      width: 100%;
-      background: linear-gradient(135deg, var(--ink) 0%, #2b2015 100%);
-      color: var(--parchment);
-      border: 1px solid var(--gold);
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
+    .card{
+      width:100%;
+      max-width:420px;
+
+      background:
+      radial-gradient(circle at top left,
+      var(--parchment) 0%,
+      var(--parch-dark) 100%);
+
+      border-radius:22px;
+
+      padding:35px 25px;
+
+      text-align:center;
+
+      box-shadow:
+      0 20px 50px rgba(0,0,0,.55);
+
+      border:1px solid rgba(201,168,76,.25);
     }
+
+    h1{
+      font-family:'Cormorant Garamond',serif;
+      font-size:42px;
+      color:var(--ink);
+      margin-bottom:5px;
+    }
+
+    .subtitle{
+      font-size:18px;
+      color:var(--gold-dark);
+      margin-bottom:28px;
+      font-style:italic;
+      font-family:'Cormorant Garamond',serif;
+    }
+
+    input{
+      width:100%;
+      padding:18px;
+      border-radius:14px;
+      border:2px solid #ddd;
+      outline:none;
+
+      font-size:26px;
+      text-align:center;
+      font-weight:bold;
+
+      margin-bottom:18px;
+    }
+
+    input:focus{
+      border-color:var(--gold);
+    }
+
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:18px;
+
+      cursor:pointer;
+
+      background:
+      linear-gradient(135deg,
+      var(--ink) 0%,
+      #312417 100%);
+
+      color:white;
+
+      font-size:16px;
+      font-weight:bold;
+
+      transition:.2s;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+    }
+
+    /* ===================== */
+    /* LEITOR PDF            */
+    /* ===================== */
+
+    #leitor-tela{
+      width:100%;
+      height:100%;
+      display:none;
+      flex-direction:column;
+      background:#222;
+    }
+
+    .toolbar{
+      height:60px;
+
+      background:var(--ink);
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      padding:0 15px;
+
+      border-bottom:2px solid var(--gold);
+
+      color:white;
+    }
+
+    .btn-back{
+      border:1px solid var(--gold);
+      background:transparent;
+      color:var(--gold);
+
+      padding:8px 15px;
+      border-radius:8px;
+
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    #titulo-hino{
+      font-weight:bold;
+      font-size:18px;
+    }
+
+    #pdf-container{
+      flex:1;
+
+      overflow:auto;
+
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+
+      padding:10px;
+
+      background:#3b3b3b;
+
+      -webkit-overflow-scrolling:touch;
+    }
+
+    canvas{
+      background:white;
+      box-shadow:0 5px 20px rgba(0,0,0,.5);
+      max-width:100%;
+      border-radius:4px;
+    }
+
+    .loading{
+      color:white;
+      font-size:18px;
+      margin-top:30px;
+    }
+
+    .erro{
+      color:#ffb0b0;
+      margin-top:15px;
+      font-size:14px;
+    }
+
   </style>
 </head>
+
 <body>
 
+<!-- ================================= -->
+<!-- BUSCADOR                          -->
+<!-- ================================= -->
+
+<div id="buscador-tela">
+
   <div class="card">
+
     <h1>Harpa Cristã</h1>
-    <div class="subtitle">Direcionador de Partituras</div>
-    <input type="number" id="hinoInput" placeholder="Nº do Hino" inputmode="numeric" min="1">
-    <button class="btn-search" onclick="direcionarParaPdf()">ABRIR PDF</button>
+
+    <div class="subtitle">
+      Buscador de Partituras
+    </div>
+
+    <input
+      type="number"
+      id="hinoInput"
+      placeholder="Digite o Nº do Hino"
+      min="1"
+      inputmode="numeric"
+    >
+
+    <button class="btn" onclick="abrirHino()">
+      VER PARTITURA
+    </button>
+
+    <div id="erro" class="erro"></div>
+
   </div>
 
-  <script>
-    // Link direto do seu arquivo no Google Drive
-    const ID_DRIVE = "1P8nX0di3BEfca1JN4JIWVpquOZQdr_Ae";
-    const PDF_URL = `https://drive.google.com/file/d/${ID_DRIVE}/view`;
+</div>
 
-    // Mapeamento de páginas com base no sumário do seu arquivo
-    function obterPaginaHino(n) {
-      if (n === 1 || n === 2) return 2;
-      if (n >= 3 && n <= 5) return 3;
-      if (n >= 6 && n <= 8) return 4;
-      if (n >= 9 && n <= 11) return 5;
-      if (n >= 12 && n <= 14) return 6;
-      if (n >= 15 && n <= 17) return 7;
-      if (n >= 18 && n <= 20) return 8;
-      if (n >= 21 && n <= 23) return 9;
-      if (n >= 24 && n <= 26) return 10;
-      return Math.floor((n - 27) / 3) + 11;
+<!-- ================================= -->
+<!-- LEITOR PDF                        -->
+<!-- ================================= -->
+
+<div id="leitor-tela">
+
+  <div class="toolbar">
+
+    <button class="btn-back" onclick="voltar()">
+      ← Voltar
+    </button>
+
+    <span id="titulo-hino">
+      Hino
+    </span>
+
+    <div style="width:70px;"></div>
+
+  </div>
+
+  <div id="pdf-container">
+
+    <div id="loading" class="loading">
+      Carregando partitura...
+    </div>
+
+    <canvas id="pdf-canvas"></canvas>
+
+  </div>
+
+</div>
+
+<script>
+
+/* ================================= */
+/* CONFIG PDF JS                     */
+/* ================================= */
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+/* ================================= */
+/* ID DO GOOGLE DRIVE                */
+/* ================================= */
+
+const ID_DRIVE = '1P8nX0di3BEfca1JN4JIWVpquOZQdr_Ae';
+
+/* ================================= */
+/* LINK PDF                          */
+/* ================================= */
+
+const PDF_URL =
+`https://drive.google.com/uc?export=view&id=${ID_DRIVE}`;
+
+/* ================================= */
+/* VARIÁVEIS                          */
+/* ================================= */
+
+let pdfDoc = null;
+
+const canvas =
+document.getElementById('pdf-canvas');
+
+const ctx =
+canvas.getContext('2d');
+
+/* ================================= */
+/* MAPA DOS HINOS                    */
+/* ================================= */
+
+function obterPaginaHino(n){
+
+  if(n === 1 || n === 2) return 2;
+  if(n >= 3 && n <= 5) return 3;
+  if(n >= 6 && n <= 8) return 4;
+  if(n >= 9 && n <= 11) return 5;
+  if(n >= 12 && n <= 14) return 6;
+  if(n >= 15 && n <= 17) return 7;
+  if(n >= 18 && n <= 20) return 8;
+  if(n >= 21 && n <= 23) return 9;
+  if(n >= 24 && n <= 26) return 10;
+
+  return Math.floor((n - 27) / 3) + 11;
+}
+
+/* ================================= */
+/* ABRIR HINO                        */
+/* ================================= */
+
+async function abrirHino(){
+
+  const erro =
+  document.getElementById('erro');
+
+  erro.innerHTML = '';
+
+  const numero =
+  parseInt(
+    document.getElementById('hinoInput').value
+  );
+
+  if(isNaN(numero) || numero <= 0){
+
+    erro.innerHTML =
+    'Digite um número válido';
+
+    return;
+  }
+
+  const pagina =
+  obterPaginaHino(numero);
+
+  document.getElementById('buscador-tela')
+  .style.display = 'none';
+
+  document.getElementById('leitor-tela')
+  .style.display = 'flex';
+
+  document.getElementById('titulo-hino')
+  .innerHTML = `Hino ${numero}`;
+
+  document.getElementById('loading')
+  .style.display = 'block';
+
+  try{
+
+    if(!pdfDoc){
+
+      pdfDoc =
+      await pdfjsLib
+      .getDocument({
+        url:PDF_URL,
+        withCredentials:false
+      }).promise;
+
     }
 
-    function direcionarParaPdf() {
-      const input = document.getElementById('hinoInput');
-      const numeroHino = parseInt(input.value);
+    if(pagina > pdfDoc.numPages){
 
-      if (isNaN(numeroHino) || numeroHino <= 0) {
-        alert('Por favor, digite um número de hino válido.');
-        return;
-      }
-
-      const paginaAlvo = obterPaginaHino(numeroHino);
-
-      // Abre o PDF do Google Drive em uma nova aba apontando para a página correta
-      window.open(`${PDF_URL}#page=${paginaAlvo}`, '_blank');
+      alert('Página não encontrada');
+      voltar();
+      return;
     }
 
-    // Atalho para aceitar o botão "Enter" do teclado
-    document.getElementById('hinoInput').addEventListener('keypress', e => {
-      if (e.key === 'Enter') direcionarParaPdf();
+    renderizarPagina(pagina);
+
+  }
+  catch(e){
+
+    console.error(e);
+
+    alert(
+      'Erro ao carregar PDF.\n\n' +
+      'IMPORTANTE:\n\n' +
+      '1. O PDF deve estar público\n' +
+      '2. Compartilhado como:\n' +
+      '"Qualquer pessoa com o link"\n' +
+      '3. Execute em servidor local'
+    );
+
+    voltar();
+  }
+}
+
+/* ================================= */
+/* RENDER PDF                        */
+/* ================================= */
+
+async function renderizarPagina(numero){
+
+  try{
+
+    const page =
+    await pdfDoc.getPage(numero);
+
+    document.getElementById('loading')
+    .style.display = 'none';
+
+    const container =
+    document.getElementById('pdf-container');
+
+    const largura =
+    container.clientWidth - 20;
+
+    const viewportOriginal =
+    page.getViewport({scale:1});
+
+    const escala =
+    largura / viewportOriginal.width;
+
+    const viewport =
+    page.getViewport({
+      scale:escala
     });
-  </script>
+
+    canvas.width =
+    viewport.width;
+
+    canvas.height =
+    viewport.height;
+
+    await page.render({
+      canvasContext:ctx,
+      viewport:viewport
+    }).promise;
+
+  }
+  catch(e){
+
+    console.error(e);
+
+    alert('Erro ao renderizar página');
+  }
+}
+
+/* ================================= */
+/* VOLTAR                            */
+/* ================================= */
+
+function voltar(){
+
+  document.getElementById('leitor-tela')
+  .style.display = 'none';
+
+  document.getElementById('buscador-tela')
+  .style.display = 'flex';
+}
+
+/* ================================= */
+/* ENTER                             */
+/* ================================= */
+
+document
+.getElementById('hinoInput')
+.addEventListener('keydown',e=>{
+
+  if(e.key === 'Enter'){
+
+    abrirHino();
+  }
+
+});
+
+</script>
+
 </body>
 </html>
