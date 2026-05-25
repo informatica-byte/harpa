@@ -6,6 +6,7 @@
   <title>Harpa Cristã — Digital</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 
   <style>
     :root {
@@ -19,6 +20,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background: var(--ink); font-family: 'Lato', sans-serif; overflow: hidden; }
 
+    /* ── Buscador ── */
     #buscador-tela {
       display: flex;
       align-items: center;
@@ -71,6 +73,7 @@
     }
     .btn-search:active { opacity: .8; }
 
+    /* ── Leitor ── */
     #leitor-tela {
       display: none;
       flex-direction: column;
@@ -106,12 +109,25 @@
       color: var(--gold);
     }
 
-    #pdf-frame-wrap {
+    #pdf-container {
       flex: 1;
-      position: relative;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 8px;
+      gap: 10px;
     }
 
+    canvas {
+      max-width: 100%;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      background: white;
+      border-radius: 2px;
+    }
+
+    /* ── Overlay de carregamento ── */
     #loading-overlay {
       position: absolute;
       inset: 0;
@@ -136,30 +152,42 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    #loading-overlay p { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 18px; text-align: center; padding: 0 24px; }
-
-    #btn-fallback {
-      display: none;
-      margin-top: 8px;
-      background: transparent;
-      border: 1px solid var(--gold);
+    #loading-overlay p {
       color: var(--gold);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      text-align: center;
+      padding: 0 24px;
     }
 
-    #pdf-iframe {
-      width: 100%;
+    /* ── Erro ── */
+    #erro-msg {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       height: 100%;
-      border: none;
-      display: block;
+      color: #ccc;
+      text-align: center;
+      padding: 32px;
+      gap: 12px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Wrapper relativo para o overlay ── */
+    #leitor-body {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
   </style>
 </head>
 <body>
 
+  <!-- TELA 1: BUSCADOR -->
   <div id="buscador-tela">
     <div class="card">
       <h1>Harpa Cristã</h1>
@@ -169,6 +197,7 @@
     </div>
   </div>
 
+  <!-- TELA 2: LEITOR -->
   <div id="leitor-tela">
     <div class="toolbar">
       <button class="btn-back" onclick="voltarParaBusca()">← Voltar</button>
@@ -176,31 +205,33 @@
       <div style="width:70px"></div>
     </div>
 
-    <div id="pdf-frame-wrap">
+    <div id="leitor-body">
+      <!-- Overlay de loading -->
       <div id="loading-overlay">
         <div class="spinner"></div>
         <p id="loading-txt">A carregar partitura…</p>
-        <button id="btn-fallback" onclick="abrirNoOneDrive()">
-          Abrir no OneDrive ↗
-        </button>
       </div>
-      <iframe id="pdf-iframe" title="Partitura"></iframe>
+
+      <!-- Canvas onde o PDF.js renderiza -->
+      <div id="pdf-container"></div>
+
+      <!-- Mensagem de erro -->
+      <div id="erro-msg">
+        <p>⚠️ Não foi possível carregar o PDF.<br>Verifique se o arquivo <strong>harpa.pdf</strong> está na mesma pasta que o <strong>index.html</strong> no GitHub.</p>
+      </div>
     </div>
   </div>
 
   <script>
-    // ── URL do OneDrive ───────────────────────────────────────────
-    // Link de compartilhamento original convertido para embed do Office Viewer
-    const ONEDRIVE_SHARE_URL = "https://1drv.ms/b/c/3c6b04cfdf9b66c7/IQA7YO_ql_HxTaZNEBfUYEYOAf0OnG5XLIhEAuIy5Vh9GKs?e=Ppiy6r";
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-    // O Microsoft Office Online Viewer aceita qualquer URL pública de PDF
-    // Basta encodar a URL e passar como parâmetro "src"
-    function urlViewer(pagina) {
-      const encodedUrl = encodeURIComponent(ONEDRIVE_SHARE_URL);
-      // O viewer da Microsoft não suporta salto de página via URL,
-      // mas carrega o PDF corretamente sem CORS
-      return `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
-    }
+    // ── PDF local (mesmo domínio = sem CORS) ─────────────────────
+    // Renomeie seu PDF para "harpa.pdf" e coloque na raiz do repositório
+    const PDF_URL = 'harpa.pdf';
+
+    let pdfDoc = null;
+    let carregando = false;
 
     // ── Tabela de páginas ─────────────────────────────────────────
     function paginaDo(n) {
@@ -216,10 +247,7 @@
       return Math.floor((n - 27) / 3) + 11;
     }
 
-    // ── Estado ────────────────────────────────────────────────────
-    let fallbackTimer = null;
-
-    // ── Funções ───────────────────────────────────────────────────
+    // ── Abre o hino ───────────────────────────────────────────────
     function abrirHino() {
       const input = document.getElementById('hinoInput');
       const n = parseInt(input.value);
@@ -231,38 +259,67 @@
 
       const pagina = paginaDo(n);
 
+      // Alterna telas
       document.getElementById('buscador-tela').style.display = 'none';
       document.getElementById('leitor-tela').style.display   = 'flex';
       document.getElementById('titulo-leitor').textContent   = `Hino ${n}`;
       document.getElementById('loading-overlay').classList.remove('oculto');
       document.getElementById('loading-txt').textContent     = 'A carregar partitura…';
-      document.getElementById('btn-fallback').style.display  = 'none';
-      document.getElementById('pdf-iframe').src              = '';
+      document.getElementById('erro-msg').style.display      = 'none';
+      document.getElementById('pdf-container').innerHTML     = '';
 
-      const iframe = document.getElementById('pdf-iframe');
-      iframe.src = urlViewer(pagina);
+      if (pdfDoc) {
+        // PDF já em memória — renderiza direto
+        renderizarPagina(pagina);
+      } else if (!carregando) {
+        // Primeira vez — carrega o PDF
+        carregando = true;
+        pdfjsLib.getDocument(PDF_URL).promise
+          .then(pdf => {
+            pdfDoc = pdf;
+            carregando = false;
+            renderizarPagina(pagina);
+          })
+          .catch(() => {
+            carregando = false;
+            document.getElementById('loading-overlay').classList.add('oculto');
+            document.getElementById('erro-msg').style.display = 'flex';
+          });
+      }
+    }
 
-      iframe.onload = () => {
-        clearTimeout(fallbackTimer);
-        document.getElementById('loading-overlay').classList.add('oculto');
-      };
+    // ── Renderiza a página alvo (e as duas seguintes se existirem) ─
+    async function renderizarPagina(numPagina) {
+      const container = document.getElementById('pdf-container');
+      container.innerHTML = '';
 
-      // Após 10s sem resposta, mostra botão de fallback
-      fallbackTimer = setTimeout(() => {
-        document.getElementById('loading-txt').textContent = 'A demorar mais do que o normal…';
-        document.getElementById('btn-fallback').style.display = 'block';
-      }, 10000);
+      const totalPaginas = pdfDoc.numPages;
+      // Renderiza até 3 páginas (uma partitura pode ocupar 1–2 páginas)
+      const paginas = [numPagina, numPagina + 1].filter(p => p <= totalPaginas);
+
+      for (const num of paginas) {
+        const page = await pdfDoc.getPage(num);
+        const largura = container.clientWidth - 16;
+        const vpBase  = page.getViewport({ scale: 1 });
+        const escala  = largura / vpBase.width;
+        const vp      = page.getViewport({ scale: escala });
+
+        const canvas  = document.createElement('canvas');
+        canvas.width  = vp.width;
+        canvas.height = vp.height;
+        container.appendChild(canvas);
+
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      }
+
+      document.getElementById('loading-overlay').classList.add('oculto');
+      // Scrolla para o topo
+      container.scrollTop = 0;
     }
 
     function voltarParaBusca() {
-      clearTimeout(fallbackTimer);
-      document.getElementById('pdf-iframe').src            = '';
       document.getElementById('leitor-tela').style.display  = 'none';
       document.getElementById('buscador-tela').style.display = 'flex';
-    }
-
-    function abrirNoOneDrive() {
-      window.open(ONEDRIVE_SHARE_URL, '_blank');
     }
 
     document.getElementById('hinoInput').addEventListener('keypress', e => {
