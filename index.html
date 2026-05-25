@@ -1,498 +1,337 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
-  <title>Harpa Cristã Digital</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Harpa Cristã — Digital</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- PDF JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-
   <style>
-    :root{
-      --gold:#c9a84c;
-      --gold-dark:#8a6820;
-      --ink:#1a1209;
-      --parchment:#faf6ef;
-      --parch-dark:#f0e9d8;
+    :root {
+      --gold:       #c9a84c;
+      --gold-dark:  #8a6820;
+      --ink:        #1a1209;
+      --parchment:  #faf6ef;
+      --parch-dark: #f0e9d8;
     }
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--ink); font-family: 'Lato', sans-serif; overflow: hidden; }
+
+    /* ── Tela do Buscador ── */
+    #buscador-tela {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 16px;
     }
 
-    html,body{
-      width:100%;
-      height:100%;
-      overflow:hidden;
-      font-family:'Lato',sans-serif;
-      background:#111;
+    .card {
+      background: radial-gradient(circle at top left, var(--parchment) 0%, var(--parch-dark) 100%);
+      width: 100%;
+      max-width: 400px;
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border: 1px solid rgba(138,104,32,0.2);
     }
 
-    /* ===================== */
-    /* TELA BUSCA            */
-    /* ===================== */
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--ink); margin-bottom: 4px; }
+    .subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 18px; color: var(--gold-dark); margin-bottom: 24px; }
 
-    #buscador-tela{
-      width:100%;
-      height:100%;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:20px;
-      background:
-      radial-gradient(circle at top,
-      #2b2015 0%,
-      #111 100%);
+    input[type="number"] {
+      width: 100%;
+      padding: 16px;
+      font-size: 24px;
+      font-weight: 700;
+      border: 2px solid var(--parch-dark);
+      border-radius: 12px;
+      text-align: center;
+      outline: none;
+      margin-bottom: 16px;
+      background: white;
+      color: var(--ink);
+    }
+    input[type="number"]:focus {
+      border-color: var(--gold);
     }
 
-    .card{
-      width:100%;
-      max-width:420px;
+    .btn-search {
+      width: 100%;
+      background: linear-gradient(135deg, var(--ink) 0%, #2b2015 100%);
+      color: var(--parchment);
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: opacity .2s;
+    }
+    .btn-search:active { opacity: .8; }
 
-      background:
-      radial-gradient(circle at top left,
-      var(--parchment) 0%,
-      var(--parch-dark) 100%);
-
-      border-radius:22px;
-
-      padding:35px 25px;
-
-      text-align:center;
-
-      box-shadow:
-      0 20px 50px rgba(0,0,0,.55);
-
-      border:1px solid rgba(201,168,76,.25);
+    /* ── Tela do Leitor ── */
+    #leitor-tela {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      background: #2a2a2a;
     }
 
-    h1{
-      font-family:'Cormorant Garamond',serif;
-      font-size:42px;
-      color:var(--ink);
-      margin-bottom:5px;
+    .toolbar {
+      background: var(--ink);
+      color: white;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--gold);
+      flex-shrink: 0;
     }
 
-    .subtitle{
-      font-size:18px;
-      color:var(--gold-dark);
-      margin-bottom:28px;
-      font-style:italic;
-      font-family:'Cormorant Garamond',serif;
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
     }
 
-    input{
-      width:100%;
-      padding:18px;
-      border-radius:14px;
-      border:2px solid #ddd;
-      outline:none;
-
-      font-size:26px;
-      text-align:center;
-      font-weight:bold;
-
-      margin-bottom:18px;
+    #titulo-leitor {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      color: var(--gold);
     }
 
-    input:focus{
-      border-color:var(--gold);
+    #pdf-frame-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
     }
 
-    .btn{
-      width:100%;
-      border:none;
-      border-radius:14px;
-      padding:18px;
-
-      cursor:pointer;
-
-      background:
-      linear-gradient(135deg,
-      var(--ink) 0%,
-      #312417 100%);
-
-      color:white;
-
-      font-size:16px;
-      font-weight:bold;
-
-      transition:.2s;
+    /* Overlay de carregamento */
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: #2a2a2a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 10;
+      transition: opacity .4s;
+    }
+    #loading-overlay.oculto {
+      opacity: 0;
+      pointer-events: none;
     }
 
-    .btn:hover{
-      transform:translateY(-2px);
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(201,168,76,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #loading-overlay p {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
     }
 
-    /* ===================== */
-    /* LEITOR PDF            */
-    /* ===================== */
-
-    #leitor-tela{
-      width:100%;
-      height:100%;
-      display:none;
-      flex-direction:column;
-      background:#222;
+    /* Botão de fallback (aparece se demorar muito) */
+    #btn-fallback {
+      display: none;
+      margin-top: 8px;
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
     }
 
-    .toolbar{
-      height:60px;
-
-      background:var(--ink);
-
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-
-      padding:0 15px;
-
-      border-bottom:2px solid var(--gold);
-
-      color:white;
+    /* iframe do Google Docs Viewer */
+    #pdf-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
     }
 
-    .btn-back{
-      border:1px solid var(--gold);
-      background:transparent;
-      color:var(--gold);
-
-      padding:8px 15px;
-      border-radius:8px;
-
-      cursor:pointer;
-      font-weight:bold;
+    /* Mensagem de erro */
+    #erro-msg {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #ccc;
+      text-align: center;
+      padding: 24px;
+      gap: 16px;
     }
-
-    #titulo-hino{
-      font-weight:bold;
-      font-size:18px;
+    #erro-msg p { font-size: 16px; line-height: 1.6; }
+    #btn-abrir-drive {
+      background: var(--gold);
+      color: var(--ink);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
     }
-
-    #pdf-container{
-      flex:1;
-
-      overflow:auto;
-
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-
-      padding:10px;
-
-      background:#3b3b3b;
-
-      -webkit-overflow-scrolling:touch;
-    }
-
-    canvas{
-      background:white;
-      box-shadow:0 5px 20px rgba(0,0,0,.5);
-      max-width:100%;
-      border-radius:4px;
-    }
-
-    .loading{
-      color:white;
-      font-size:18px;
-      margin-top:30px;
-    }
-
-    .erro{
-      color:#ffb0b0;
-      margin-top:15px;
-      font-size:14px;
-    }
-
   </style>
 </head>
-
 <body>
 
-<!-- ================================= -->
-<!-- BUSCADOR                          -->
-<!-- ================================= -->
+  <!-- ══ TELA 1: BUSCADOR ══ -->
+  <div id="buscador-tela">
+    <div class="card">
+      <h1>Harpa Cristã</h1>
+      <div class="subtitle">Buscador de Partituras</div>
+      <input type="number" id="hinoInput" placeholder="Nº do Hino" inputmode="numeric" min="1" max="640">
+      <button class="btn-search" onclick="abrirHino()">VER PARTITURA</button>
+    </div>
+  </div>
 
-<div id="buscador-tela">
-
-  <div class="card">
-
-    <h1>Harpa Cristã</h1>
-
-    <div class="subtitle">
-      Buscador de Partituras
+  <!-- ══ TELA 2: LEITOR ══ -->
+  <div id="leitor-tela">
+    <div class="toolbar">
+      <button class="btn-back" onclick="voltarParaBusca()">← Voltar</button>
+      <span id="titulo-leitor">Hino</span>
+      <div style="width:70px"></div>
     </div>
 
-    <input
-      type="number"
-      id="hinoInput"
-      placeholder="Digite o Nº do Hino"
-      min="1"
-      inputmode="numeric"
-    >
+    <div id="pdf-frame-wrap">
 
-    <button class="btn" onclick="abrirHino()">
-      VER PARTITURA
-    </button>
+      <!-- Overlay de carregamento -->
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p id="loading-txt">A carregar partitura…</p>
+        <button id="btn-fallback" onclick="abrirNoDrive()">
+          Abrir no Google Drive ↗
+        </button>
+      </div>
 
-    <div id="erro" class="erro"></div>
+      <!-- iframe — Google Docs Viewer não tem bloqueio CORS -->
+      <iframe id="pdf-iframe" title="Partitura"></iframe>
 
-  </div>
+      <!-- Fallback de erro -->
+      <div id="erro-msg">
+        <p>Não foi possível exibir o PDF aqui.<br>Abra diretamente no Google Drive para ver a partitura.</p>
+        <button id="btn-abrir-drive" onclick="abrirNoDrive()">Abrir no Google Drive ↗</button>
+      </div>
 
-</div>
-
-<!-- ================================= -->
-<!-- LEITOR PDF                        -->
-<!-- ================================= -->
-
-<div id="leitor-tela">
-
-  <div class="toolbar">
-
-    <button class="btn-back" onclick="voltar()">
-      ← Voltar
-    </button>
-
-    <span id="titulo-hino">
-      Hino
-    </span>
-
-    <div style="width:70px;"></div>
-
-  </div>
-
-  <div id="pdf-container">
-
-    <div id="loading" class="loading">
-      Carregando partitura...
     </div>
-
-    <canvas id="pdf-canvas"></canvas>
-
   </div>
 
-</div>
+  <script>
+    // ── Configuração ──────────────────────────────────────────────
+    const ID_DRIVE = "1P8nX0di3BEfca1JN4JIWVpquOZQdr_Ae";
 
-<script>
-
-/* ================================= */
-/* CONFIG PDF JS                     */
-/* ================================= */
-
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-
-/* ================================= */
-/* ID DO GOOGLE DRIVE                */
-/* ================================= */
-
-const ID_DRIVE = '1P8nX0di3BEfca1JN4JIWVpquOZQdr_Ae';
-
-/* ================================= */
-/* LINK PDF                          */
-/* ================================= */
-
-const PDF_URL =
-`https://drive.google.com/uc?export=view&id=${ID_DRIVE}`;
-
-/* ================================= */
-/* VARIÁVEIS                          */
-/* ================================= */
-
-let pdfDoc = null;
-
-const canvas =
-document.getElementById('pdf-canvas');
-
-const ctx =
-canvas.getContext('2d');
-
-/* ================================= */
-/* MAPA DOS HINOS                    */
-/* ================================= */
-
-function obterPaginaHino(n){
-
-  if(n === 1 || n === 2) return 2;
-  if(n >= 3 && n <= 5) return 3;
-  if(n >= 6 && n <= 8) return 4;
-  if(n >= 9 && n <= 11) return 5;
-  if(n >= 12 && n <= 14) return 6;
-  if(n >= 15 && n <= 17) return 7;
-  if(n >= 18 && n <= 20) return 8;
-  if(n >= 21 && n <= 23) return 9;
-  if(n >= 24 && n <= 26) return 10;
-
-  return Math.floor((n - 27) / 3) + 11;
-}
-
-/* ================================= */
-/* ABRIR HINO                        */
-/* ================================= */
-
-async function abrirHino(){
-
-  const erro =
-  document.getElementById('erro');
-
-  erro.innerHTML = '';
-
-  const numero =
-  parseInt(
-    document.getElementById('hinoInput').value
-  );
-
-  if(isNaN(numero) || numero <= 0){
-
-    erro.innerHTML =
-    'Digite um número válido';
-
-    return;
-  }
-
-  const pagina =
-  obterPaginaHino(numero);
-
-  document.getElementById('buscador-tela')
-  .style.display = 'none';
-
-  document.getElementById('leitor-tela')
-  .style.display = 'flex';
-
-  document.getElementById('titulo-hino')
-  .innerHTML = `Hino ${numero}`;
-
-  document.getElementById('loading')
-  .style.display = 'block';
-
-  try{
-
-    if(!pdfDoc){
-
-      pdfDoc =
-      await pdfjsLib
-      .getDocument({
-        url:PDF_URL,
-        withCredentials:false
-      }).promise;
-
+    // URL para o Google Docs Viewer (sem bloqueio CORS no navegador)
+    // O "#page=N" funciona no viewer do Google
+    function urlViewer(pagina) {
+      const pdfUrl = `https://drive.google.com/file/d/${ID_DRIVE}/preview`;
+      // O viewer do Google aceita ?page=N para ir direto à página
+      return `https://drive.google.com/file/d/${ID_DRIVE}/preview#page=${pagina}`;
     }
 
-    if(pagina > pdfDoc.numPages){
-
-      alert('Página não encontrada');
-      voltar();
-      return;
+    // URL de download direto (para abrir numa nova aba como fallback)
+    function urlDireto() {
+      return `https://drive.google.com/file/d/${ID_DRIVE}/view`;
     }
 
-    renderizarPagina(pagina);
+    // ── Tabela de páginas ─────────────────────────────────────────
+    function paginaDo(n) {
+      if (n === 1 || n === 2) return 2;
+      if (n >= 3  && n <= 5)  return 3;
+      if (n >= 6  && n <= 8)  return 4;
+      if (n >= 9  && n <= 11) return 5;
+      if (n >= 12 && n <= 14) return 6;
+      if (n >= 15 && n <= 17) return 7;
+      if (n >= 18 && n <= 20) return 8;
+      if (n >= 21 && n <= 23) return 9;
+      if (n >= 24 && n <= 26) return 10;
+      return Math.floor((n - 27) / 3) + 11;
+    }
 
-  }
-  catch(e){
+    // ── Estado ────────────────────────────────────────────────────
+    let hinoAtual = null;
+    let fallbackTimer = null;
 
-    console.error(e);
+    // ── Funções principais ────────────────────────────────────────
+    function abrirHino() {
+      const input = document.getElementById('hinoInput');
+      const n = parseInt(input.value);
 
-    alert(
-      'Erro ao carregar PDF.\n\n' +
-      'IMPORTANTE:\n\n' +
-      '1. O PDF deve estar público\n' +
-      '2. Compartilhado como:\n' +
-      '"Qualquer pessoa com o link"\n' +
-      '3. Execute em servidor local'
-    );
+      if (isNaN(n) || n < 1) {
+        alert('Por favor, insira um número de hino válido.');
+        return;
+      }
 
-    voltar();
-  }
-}
+      hinoAtual = n;
+      const pagina = paginaDo(n);
 
-/* ================================= */
-/* RENDER PDF                        */
-/* ================================= */
+      // Alterna telas
+      document.getElementById('buscador-tela').style.display = 'none';
+      document.getElementById('leitor-tela').style.display   = 'flex';
 
-async function renderizarPagina(numero){
+      // Reset estado
+      document.getElementById('titulo-leitor').textContent = `Hino ${n}`;
+      document.getElementById('loading-overlay').classList.remove('oculto');
+      document.getElementById('loading-txt').textContent = 'A carregar partitura…';
+      document.getElementById('btn-fallback').style.display = 'none';
+      document.getElementById('erro-msg').style.display = 'none';
+      document.getElementById('pdf-iframe').src = '';
 
-  try{
+      // Carrega o iframe
+      const iframe = document.getElementById('pdf-iframe');
+      iframe.src = urlViewer(pagina);
 
-    const page =
-    await pdfDoc.getPage(numero);
+      // Quando o iframe terminar de carregar, esconde o overlay
+      iframe.onload = () => {
+        clearTimeout(fallbackTimer);
+        document.getElementById('loading-overlay').classList.add('oculto');
+      };
 
-    document.getElementById('loading')
-    .style.display = 'none';
+      // Se demorar mais de 8 s, mostra botão de fallback
+      fallbackTimer = setTimeout(() => {
+        document.getElementById('loading-txt').textContent = 'A demorar mais do que o normal…';
+        document.getElementById('btn-fallback').style.display = 'block';
+      }, 8000);
+    }
 
-    const container =
-    document.getElementById('pdf-container');
+    function voltarParaBusca() {
+      clearTimeout(fallbackTimer);
+      // Para o iframe (evita downloads em background)
+      document.getElementById('pdf-iframe').src = '';
+      document.getElementById('leitor-tela').style.display  = 'none';
+      document.getElementById('buscador-tela').style.display = 'flex';
+    }
 
-    const largura =
-    container.clientWidth - 20;
+    function abrirNoDrive() {
+      window.open(urlDireto(), '_blank');
+    }
 
-    const viewportOriginal =
-    page.getViewport({scale:1});
-
-    const escala =
-    largura / viewportOriginal.width;
-
-    const viewport =
-    page.getViewport({
-      scale:escala
+    // Atalho: Enter faz a busca
+    document.getElementById('hinoInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') abrirHino();
     });
-
-    canvas.width =
-    viewport.width;
-
-    canvas.height =
-    viewport.height;
-
-    await page.render({
-      canvasContext:ctx,
-      viewport:viewport
-    }).promise;
-
-  }
-  catch(e){
-
-    console.error(e);
-
-    alert('Erro ao renderizar página');
-  }
-}
-
-/* ================================= */
-/* VOLTAR                            */
-/* ================================= */
-
-function voltar(){
-
-  document.getElementById('leitor-tela')
-  .style.display = 'none';
-
-  document.getElementById('buscador-tela')
-  .style.display = 'flex';
-}
-
-/* ================================= */
-/* ENTER                             */
-/* ================================= */
-
-document
-.getElementById('hinoInput')
-.addEventListener('keydown',e=>{
-
-  if(e.key === 'Enter'){
-
-    abrirHino();
-  }
-
-});
-
-</script>
-
+  </script>
 </body>
 </html>
