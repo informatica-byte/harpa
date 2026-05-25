@@ -20,22 +20,15 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background: var(--ink); font-family: 'Lato', sans-serif; overflow: hidden; }
 
-    /* ── Buscador ── */
     #buscador-tela {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      padding: 16px;
+      display: flex; align-items: center; justify-content: center;
+      height: 100%; padding: 16px;
     }
 
     .card {
       background: radial-gradient(circle at top left, var(--parchment) 0%, var(--parch-dark) 100%);
-      width: 100%;
-      max-width: 400px;
-      border-radius: 20px;
-      padding: 32px 24px;
-      text-align: center;
+      width: 100%; max-width: 400px; border-radius: 20px;
+      padding: 32px 24px; text-align: center;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
       border: 1px solid rgba(138,104,32,0.2);
     }
@@ -44,150 +37,81 @@
     .subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 18px; color: var(--gold-dark); margin-bottom: 24px; }
 
     input[type="number"] {
-      width: 100%;
-      padding: 16px;
-      font-size: 24px;
-      font-weight: 700;
-      border: 2px solid var(--parch-dark);
-      border-radius: 12px;
-      text-align: center;
-      outline: none;
-      margin-bottom: 16px;
-      background: white;
-      color: var(--ink);
+      width: 100%; padding: 16px; font-size: 24px; font-weight: 700;
+      border: 2px solid var(--parch-dark); border-radius: 12px;
+      text-align: center; outline: none; margin-bottom: 16px;
+      background: white; color: var(--ink);
     }
     input[type="number"]:focus { border-color: var(--gold); }
 
     .btn-search {
       width: 100%;
       background: linear-gradient(135deg, var(--ink) 0%, #2b2015 100%);
-      color: var(--parchment);
-      border: 1px solid var(--gold);
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 1px;
-      transition: opacity .2s;
+      color: var(--parchment); border: 1px solid var(--gold);
+      border-radius: 12px; padding: 16px; font-size: 16px;
+      font-weight: 700; cursor: pointer; letter-spacing: 1px; transition: opacity .2s;
     }
     .btn-search:active { opacity: .8; }
 
-    /* ── Leitor ── */
     #leitor-tela {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      background: #2a2a2a;
+      display: none; flex-direction: column; height: 100%; background: #2a2a2a;
     }
 
     .toolbar {
-      background: var(--ink);
-      color: white;
-      padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid var(--gold);
-      flex-shrink: 0;
+      background: var(--ink); color: white; padding: 10px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--gold); flex-shrink: 0;
     }
 
     .btn-back {
-      background: transparent;
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
+      background: transparent; border: 1px solid var(--gold); color: var(--gold);
+      padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px;
     }
 
-    #titulo-leitor {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px;
-      color: var(--gold);
-    }
+    #titulo-leitor { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--gold); }
+
+    #leitor-body { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
 
     #pdf-container {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 12px 8px;
-      gap: 10px;
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 12px 8px; gap: 10px;
     }
 
     canvas {
-      max-width: 100%;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      background: white;
-      border-radius: 2px;
+      max-width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      background: white; border-radius: 2px;
     }
 
-    /* ── Overlay de carregamento ── */
     #loading-overlay {
-      position: absolute;
-      inset: 0;
-      background: #2a2a2a;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      z-index: 10;
-      transition: opacity .4s;
+      position: absolute; inset: 0; background: #2a2a2a;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; z-index: 10; transition: opacity .4s;
     }
     #loading-overlay.oculto { opacity: 0; pointer-events: none; }
 
     .spinner {
-      width: 44px;
-      height: 44px;
+      width: 44px; height: 44px;
       border: 4px solid rgba(201,168,76,0.2);
-      border-top-color: var(--gold);
-      border-radius: 50%;
+      border-top-color: var(--gold); border-radius: 50%;
       animation: spin .9s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     #loading-overlay p {
-      color: var(--gold);
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px;
-      text-align: center;
-      padding: 0 24px;
+      color: var(--gold); font-family: 'Cormorant Garamond', serif;
+      font-size: 18px; text-align: center; padding: 0 24px;
     }
 
-    /* ── Erro ── */
     #erro-msg {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #ccc;
-      text-align: center;
-      padding: 32px;
-      gap: 12px;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    /* ── Wrapper relativo para o overlay ── */
-    #leitor-body {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      display: none; flex-direction: column; align-items: center;
+      justify-content: center; height: 100%; color: #ccc;
+      text-align: center; padding: 32px; gap: 12px; font-size: 15px; line-height: 1.6;
     }
   </style>
 </head>
 <body>
 
-  <!-- TELA 1: BUSCADOR -->
   <div id="buscador-tela">
     <div class="card">
       <h1>Harpa Cristã</h1>
@@ -197,27 +121,20 @@
     </div>
   </div>
 
-  <!-- TELA 2: LEITOR -->
   <div id="leitor-tela">
     <div class="toolbar">
       <button class="btn-back" onclick="voltarParaBusca()">← Voltar</button>
       <span id="titulo-leitor">Hino</span>
       <div style="width:70px"></div>
     </div>
-
     <div id="leitor-body">
-      <!-- Overlay de loading -->
       <div id="loading-overlay">
         <div class="spinner"></div>
         <p id="loading-txt">A carregar partitura…</p>
       </div>
-
-      <!-- Canvas onde o PDF.js renderiza -->
       <div id="pdf-container"></div>
-
-      <!-- Mensagem de erro -->
       <div id="erro-msg">
-        <p>⚠️ Não foi possível carregar o PDF.<br>Verifique se o arquivo <strong>harpa.pdf</strong> está na mesma pasta que o <strong>index.html</strong> no GitHub.</p>
+        <p>⚠️ Não foi possível carregar o PDF.<br>Verifique se os arquivos <strong>harpa-1.pdf</strong> a <strong>harpa-9.pdf</strong> estão no repositório.</p>
       </div>
     </div>
   </div>
@@ -226,14 +143,25 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-    // ── PDF local (mesmo domínio = sem CORS) ─────────────────────
-    // Renomeie seu PDF para "harpa.pdf" e coloque na raiz do repositório
-    const PDF_URL = 'harpa.pdf';
+    // ── Partes do PDF ─────────────────────────────────────────────
+    // Cada entrada: [páginaInicioParte, páginaFimParte, páginaInicioNoArquivoParte]
+    // O PDF completo tem 206 páginas divididas em 9 partes de 23 páginas
+    const PARTES = [
+      { arquivo: 'harpa-1.pdf', inicio: 1,   fim: 23  },
+      { arquivo: 'harpa-2.pdf', inicio: 24,  fim: 46  },
+      { arquivo: 'harpa-3.pdf', inicio: 47,  fim: 69  },
+      { arquivo: 'harpa-4.pdf', inicio: 70,  fim: 92  },
+      { arquivo: 'harpa-5.pdf', inicio: 93,  fim: 115 },
+      { arquivo: 'harpa-6.pdf', inicio: 116, fim: 138 },
+      { arquivo: 'harpa-7.pdf', inicio: 139, fim: 161 },
+      { arquivo: 'harpa-8.pdf', inicio: 162, fim: 184 },
+      { arquivo: 'harpa-9.pdf', inicio: 185, fim: 206 },
+    ];
 
-    let pdfDoc = null;
-    let carregando = false;
+    // Cache de partes já carregadas
+    const cachePartes = {};
 
-    // ── Tabela de páginas ─────────────────────────────────────────
+    // ── Tabela de páginas do PDF completo ────────────────────────
     function paginaDo(n) {
       if (n === 1 || n === 2) return 2;
       if (n >= 3  && n <= 5)  return 3;
@@ -247,6 +175,22 @@
       return Math.floor((n - 27) / 3) + 11;
     }
 
+    // Descobre qual parte contém a página global e retorna
+    // { parte, paginaLocal } onde paginaLocal é o número dentro do arquivo parcial
+    function resolverPagina(paginaGlobal) {
+      for (const parte of PARTES) {
+        if (paginaGlobal >= parte.inicio && paginaGlobal <= parte.fim) {
+          return {
+            parte,
+            paginaLocal: paginaGlobal - parte.inicio + 1
+          };
+        }
+      }
+      // fallback: última parte
+      const ultima = PARTES[PARTES.length - 1];
+      return { parte: ultima, paginaLocal: 1 };
+    }
+
     // ── Abre o hino ───────────────────────────────────────────────
     function abrirHino() {
       const input = document.getElementById('hinoInput');
@@ -257,48 +201,43 @@
         return;
       }
 
-      const pagina = paginaDo(n);
+      const paginaGlobal = paginaDo(n);
+      const { parte, paginaLocal } = resolverPagina(paginaGlobal);
 
-      // Alterna telas
       document.getElementById('buscador-tela').style.display = 'none';
       document.getElementById('leitor-tela').style.display   = 'flex';
       document.getElementById('titulo-leitor').textContent   = `Hino ${n}`;
       document.getElementById('loading-overlay').classList.remove('oculto');
-      document.getElementById('loading-txt').textContent     = 'A carregar partitura…';
+      document.getElementById('loading-txt').textContent     = `A carregar parte ${parte.arquivo}…`;
       document.getElementById('erro-msg').style.display      = 'none';
       document.getElementById('pdf-container').innerHTML     = '';
 
-      if (pdfDoc) {
-        // PDF já em memória — renderiza direto
-        renderizarPagina(pagina);
-      } else if (!carregando) {
-        // Primeira vez — carrega o PDF
-        carregando = true;
-        pdfjsLib.getDocument(PDF_URL).promise
-          .then(pdf => {
-            pdfDoc = pdf;
-            carregando = false;
-            renderizarPagina(pagina);
-          })
-          .catch(() => {
-            carregando = false;
-            document.getElementById('loading-overlay').classList.add('oculto');
-            document.getElementById('erro-msg').style.display = 'flex';
-          });
+      carregarParte(parte, paginaLocal);
+    }
+
+    async function carregarParte(parte, paginaLocal) {
+      try {
+        // Usa cache se já carregou essa parte antes
+        if (!cachePartes[parte.arquivo]) {
+          cachePartes[parte.arquivo] = await pdfjsLib.getDocument(parte.arquivo).promise;
+        }
+        const pdfDoc = cachePartes[parte.arquivo];
+        await renderizarPagina(pdfDoc, paginaLocal);
+      } catch (e) {
+        document.getElementById('loading-overlay').classList.add('oculto');
+        document.getElementById('erro-msg').style.display = 'flex';
       }
     }
 
-    // ── Renderiza a página alvo (e as duas seguintes se existirem) ─
-    async function renderizarPagina(numPagina) {
+    async function renderizarPagina(pdfDoc, paginaLocal) {
       const container = document.getElementById('pdf-container');
       container.innerHTML = '';
 
-      const totalPaginas = pdfDoc.numPages;
-      // Renderiza até 3 páginas (uma partitura pode ocupar 1–2 páginas)
-      const paginas = [numPagina, numPagina + 1].filter(p => p <= totalPaginas);
+      // Renderiza a página do hino e a seguinte (caso a partitura tenha 2 páginas)
+      const paginas = [paginaLocal, paginaLocal + 1].filter(p => p <= pdfDoc.numPages);
 
       for (const num of paginas) {
-        const page = await pdfDoc.getPage(num);
+        const page    = await pdfDoc.getPage(num);
         const largura = container.clientWidth - 16;
         const vpBase  = page.getViewport({ scale: 1 });
         const escala  = largura / vpBase.width;
@@ -313,7 +252,6 @@
       }
 
       document.getElementById('loading-overlay').classList.add('oculto');
-      // Scrolla para o topo
       container.scrollTop = 0;
     }
 
