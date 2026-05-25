@@ -3,12 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Harpa Cristã — Digital</title>
+  <title>Harpa Cristã — Buscador</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-
   <style>
     :root {
       --gold:       #c9a84c;
@@ -19,14 +16,12 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: var(--ink); font-family: 'Lato', sans-serif; overflow: hidden; }
+    html, body { height: 100%; background: var(--ink); font-family: 'Lato', sans-serif; }
 
-    /* Tela Inicial do Buscador */
-    #buscador-tela {
+    body {
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100%;
       padding: 16px;
     }
 
@@ -67,91 +62,23 @@
       font-weight: 700;
       cursor: pointer;
     }
-
-    /* Tela do Leitor Embutido */
-    #leitor-tela {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      background: #333;
-    }
-
-    .toolbar {
-      background: var(--ink);
-      color: white;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid var(--gold);
-    }
-
-    .btn-back {
-      background: transparent;
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    #pdf-container {
-      flex: 1;
-      overflow: auto;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 5px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    canvas {
-      max-width: 100%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      background: white;
-    }
-
-    .loading { color: white; font-size: 16px; text-align: center; margin-top: 30px; }
   </style>
 </head>
 <body>
 
-  <div id="buscador-tela">
-    <div class="card">
-      <h1>Harpa Cristã</h1>
-      <div class="subtitle">Buscador de Partituras Embutido</div>
-      <input type="number" id="hinoInput" placeholder="Nº do Hino" inputmode="numeric" min="1">
-      <button class="btn-search" onclick="abrirHinoNoLeitor()">VER PARTITURA</button>
-    </div>
-  </div>
-
-  <div id="leitor-tela">
-    <div class="toolbar">
-      <button class="btn-back" onclick="fecharLeitor()">← Voltar</button>
-      <span id="titulo-hino">Hino</span>
-      <div style="width: 70px;"></div>
-    </div>
-    <div id="pdf-container">
-      <div id="loading-msg" class="loading">A carregar partitura...</div>
-      <canvas id="pdf-canvas"></canvas>
-    </div>
+  <div class="card">
+    <h1>Harpa Cristã</h1>
+    <div class="subtitle">Direcionador de Partituras</div>
+    <input type="number" id="hinoInput" placeholder="Nº do Hino" inputmode="numeric" min="1">
+    <button class="btn-search" onclick="direcionarParaPdf()">ABRIR PDF</button>
   </div>
 
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-
-    // ID do seu ficheiro do Google Drive
+    // Link direto do seu arquivo no Google Drive
     const ID_DRIVE = "1P8nX0di3BEfca1JN4JIWVpquOZQdr_Ae";
-    
-    // Link de extração direta (ignora a interface visual travada do Drive)
-    const PDF_URL = `https://docs.google.com/uc?export=download&id=${ID_DRIVE}`;
+    const PDF_URL = `https://drive.google.com/file/d/${ID_DRIVE}/view`;
 
-    let documentoPdf = null;
-    let canvas = document.getElementById('pdf-canvas');
-    let ctx = canvas.getContext('2d');
-
-    // Mapeamento matemático baseado nas páginas do seu arquivo original
+    // Mapeamento de páginas com base no sumário do seu arquivo
     function obterPaginaHino(n) {
       if (n === 1 || n === 2) return 2;
       if (n >= 3 && n <= 5) return 3;
@@ -165,65 +92,24 @@
       return Math.floor((n - 27) / 3) + 11;
     }
 
-    function abrirHinoNoLeitor() {
+    function direcionarParaPdf() {
       const input = document.getElementById('hinoInput');
       const numeroHino = parseInt(input.value);
 
       if (isNaN(numeroHino) || numeroHino <= 0) {
-        alert('Por favor, digite um número válido.');
+        alert('Por favor, digite um número de hino válido.');
         return;
       }
 
       const paginaAlvo = obterPaginaHino(numeroHino);
 
-      document.getElementById('buscador-tela').style.display = 'none';
-      document.getElementById('leitor-tela').style.display = 'flex';
-      document.getElementById('loading-msg').style.display = 'block';
-      document.getElementById('titulo-hino').textContent = `Hino ${numeroHino}`;
-
-      if (documentoPdf === null) {
-        pdfjsLib.getDocument(PDF_URL).promise.then(pdf => {
-          documentoPdf = pdf;
-          renderizarPagina(paginaAlvo);
-        }).catch(err => {
-          alert('Erro ao aceder ao PDF. Verifique se o arquivo no seu Google Drive está partilhado como "Qualquer pessoa com o link".');
-          fecharLeitor();
-        });
-      } else {
-        renderizarPagina(paginaAlvo);
-      }
+      // Abre o PDF do Google Drive em uma nova aba apontando para a página correta
+      window.open(`${PDF_URL}#page=${paginaAlvo}`, '_blank');
     }
 
-    function renderizarPagina(numPagina) {
-      documentoPdf.getPage(numPagina).then(page => {
-        document.getElementById('loading-msg').style.display = 'none';
-
-        // Deteta a largura do ecrã do telemóvel e maximiza a folha sem distorcer
-        const containerWidth = document.getElementById('pdf-container').clientWidth;
-        const viewportOriginal = page.getViewport({ scale: 1 });
-        const escalaAdaptada = (containerWidth - 10) / viewportOriginal.width;
-        
-        const viewport = page.getViewport({ scale: escalaAdaptada });
-
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        const renderContext = {
-          canvasContext: ctx,
-          viewport: viewport
-        };
-        
-        page.render(renderContext);
-      });
-    }
-
-    function fecharLeitor() {
-      document.getElementById('leitor-tela').style.display = 'none';
-      document.getElementById('buscador-tela').style.display = 'flex';
-    }
-
+    // Atalho para aceitar o botão "Enter" do teclado
     document.getElementById('hinoInput').addEventListener('keypress', e => {
-      if (e.key === 'Enter') abrirHinoNoLeitor();
+      if (e.key === 'Enter') direcionarParaPdf();
     });
   </script>
 </body>
